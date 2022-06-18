@@ -22,7 +22,7 @@ async function getProducts() {
     
         newTitle.setAttribute("class", "productName");
         newText.setAttribute("class", "productDescription");
-        newLink.href ="./product.html?id=" + kanap._id;
+        newLink.href =`./product.html?id=${kanap._id}`;
         newImage.src = kanap.imageUrl;
         newImage.alt = kanap.altTxt;
         newTitle.textContent = kanap.name;
@@ -38,21 +38,5 @@ async function getProducts() {
  //execution of the function
  getProducts()
 
-
- /*
- for (const item of produit) {
-    document.querySelector("section").innerHTML +=
-        `<a href="./product.html?id=${item._id}">
-            <article>
-                <img src="${item.imageUrl}" alt="${item.altTxt}">
-                <h3 class="productName">
-                    ${item.name}
-                </h3>
-                <p class="productDescription">
-                ${item.description}
-                </p>
-            </article>
-        </a>`
-}
-*/
+ 
 
