@@ -21,7 +21,7 @@ function kanapItem(item){
 // fonction qui injecte les datas du array "colors" dans le menu déroulant
 function kanapColors(color){
     let select = document.getElementById("colors"); 
-    let option = document.createElement("option");
+    let option = document.createElement("option"); 
     
     option.value = color;
     option.textContent = color;
