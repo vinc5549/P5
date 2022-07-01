@@ -34,13 +34,32 @@ function createKanap(kanap){
     newInput.setAttribute("value", kanap.quantity);
     newDiv_again_2.setAttribute("class", "cart__item__content__settings__delete");
     newDelete.setAttribute("class", "deleteItem");
-    newDelete.setAttribute("data-id", kanap.id);
-    newDelete.setAttribute("data-color", kanap.color);
-    newQuantity.setAttribute("data-id", kanap.id);
-    newQuantity.setAttribute("data-color", kanap.color);
     newColor.textContent = kanap.color;
-    newQuantity.textContent = kanap.quantity;
+    newQuantity.textContent = "Qté : "+kanap.quantity;
     newDelete.textContent = "Supprimer";
+
+   // gestion de l'event QUANTITE
+    newInput.addEventListener("change", (event) => {        
+        article = event.target.closest("article");    
+        id = article.getAttribute('data-id');
+        color = article.getAttribute('data-color');
+        let quantityUpdateIndex = cart.findIndex(itemInCart => itemInCart.id === id && itemInCart.color === color);
+        cart[quantityUpdateIndex].quantity = event.target.value;
+        localStorage.setItem("cart", JSON.stringify(cart));
+        calc();
+    });
+
+    // gestion de l'event DELETE
+    newDelete.addEventListener("click", (event) => {
+        article = event.target.closest("article");
+        article.remove();
+        id = article.getAttribute('data-id');
+        color = article.getAttribute('data-color');
+        let cartDeleteIndex = cart.findIndex(itemInCart => itemInCart.id === id && itemInCart.color === color);
+        cart.splice(cartDeleteIndex, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        calc();
+    });
 
     element.appendChild(newArticle);
     newArticle.appendChild(newDiv_1);
@@ -57,8 +76,8 @@ function createKanap(kanap){
     newDiv_again.appendChild(newInput);
     newDiv_again_2.appendChild(newDelete);
 
-    for (let i = 0; i < cart.length; i++ ){
-        fetch("http://localhost:3000/API/products/" + kanap.id)
+    
+        fetch("http://localhost:3000/api/products/" + kanap.id)
         .then(function(res) {
         if (res.ok) {
             return res.json();
@@ -71,30 +90,23 @@ function createKanap(kanap){
             newPrice.textContent = kanapApi.price + " €";
         })
     }          
-}
+
 
 // execution de la boucle pour afficher les datas
-for (let kanap of cart) {
-    createKanap(kanap);  
+if (cart ===null || cart.length == 0) {
+        
+    document.querySelector("#cartAndFormContainer > h1").textContent= "VOTRE PANIER EST VIDE";
+}
+else {
+    for (let kanap of cart) {
+        createKanap(kanap);
+    }
 }
 
 /*********** BOUTON SUPPRIMER + UPDATE QUANTITY + TOTAL PRICE *****/
 /******************************************************************/
 
 
-/************** modify quantity button *******/
-let inputQuantity = document.querySelectorAll(".itemQuantity");
-let updatedQuantity = document.querySelectorAll(".cart__item__content__settings__quantity p");
-
-// change la quantité sur le DOM et dans le localStorage quand on change la quantité dans l'input
-for (let j = 0; j < inputQuantity.length; j++){
-    inputQuantity[j].addEventListener("change", ()=>{
-        updatedQuantity[j].textContent = inputQuantity[j].value;
-        let quantityUpdateIndex = cart.findIndex(itemInCart => itemInCart.id === updatedQuantity[j].dataset.id && itemInCart.color === updatedQuantity[j].dataset.color);
-        cart[quantityUpdateIndex].quantity = inputQuantity[j].value;
-        localStorage.setItem("cart", JSON.stringify(cart));
-    });
-}
 
 /************** calcul total price ***************/
 let totalDisplay = document.querySelector("#totalPrice"); 
@@ -109,7 +121,7 @@ function calc() {
     let totalPriceArray = [];
     let totalItemArray = [];
     for (let k = 0; k < cart.length; k++){
-        fetch("http://localhost:3000/API/products/" + cart[k].id)
+        fetch("http://localhost:3000/api/products/" + cart[k].id)
             .then(function(res) {
             if (res.ok) {
                 return res.json();
@@ -135,27 +147,9 @@ function calc() {
     }
 }
 
-for (let j = 0; j < inputQuantity.length; j++) {
-    inputQuantity[j].addEventListener("change", ()=>{
-    calc();
-})}
 
 calc();
 
-/**************** delete button *******/
-const articleToRemove = document.querySelectorAll(".cart__items");
-const deleteButton = document.querySelectorAll(".deleteItem");
-
-// remove l'item avec le dataset.id + dataset.color correspondant au bouton "supprimer" et calcule le nombre d'articles avec calc()
-for (let i = 0; i < deleteButton.length; i++){
-    deleteButton[i].addEventListener("click", ()=>{
-        deleteButton[i].closest("article").remove();
-        let cartDeleteIndex = cart.findIndex(itemInCart => itemInCart.id === deleteButton[i].dataset.id && itemInCart.color === deleteButton[i].dataset.color);
-        cart.splice(cartDeleteIndex, 1);
-        localStorage.setItem("cart", JSON.stringify(cart));
-        calc();
-    });
-}
 
 
 /********************* FORM ****************************************************/
@@ -185,7 +179,7 @@ function sendOrder() {
         contact : contact,
         products : products
     }
-    fetch("http://localhost:3000/API/products/order", {
+    fetch("http://localhost:3000/api/products/order", {
         method: "POST",
         headers: {
             'Accept': 'application/json', 
@@ -203,47 +197,33 @@ function sendOrder() {
     });
 }
 
-// verifications Fname et Lname avec regex 
-function nameValidation(field, err, msg){
+// factorisation des validations
+function validation (field, zone, msg, regex) {
     field.value.trim();
-    let nameValid = /^[a-zA-ZÀ-ÿ- ']{2,40}$/;
-    if (nameValid.test(field.value)) {
-        console.log("name valid");
+ 
+    let messageEl  = document.querySelector("#" + zone + "ErrorMsg");
+    messageEl.textContent=""; 
+    let zoneValid = regex
+    if (zoneValid.test(field.value)) {
+        console.log(`zone ${zone} is valid`);
         return true;
-    }else{
-        document.querySelector("#"+err+"ErrorMsg").textContent = msg+" invalide";
-        console.log("name NO");
+    } else {
+        messageEl.textContent = msg + " invalide";        
         return false;
     }
 }
+
+// verifications Fname et Lname avec regex 
+function nameValidation(field, zone, msg) {
+    return validation(field, zone, msg,  /^[a-zA-ZÀ-ÿ- ']{2,40}$/);}
 
 // verification adress et city avec regex
-function locationValidation(field, err, msg){
-    field.value.trim();
-    let locValid = /^[a-zA-ZÀ-ÿ0-9- ',]{2,60}$/;
-    if (locValid.test(field.value)) {
-        console.log("loc valid");
-        return true;
-    }else{
-        document.querySelector("#"+err+"ErrorMsg").textContent = msg+" invalide";
-        console.log("loc NO");
-        return false;
-    }
-}
+function locationValidation(field, zone, msg) {
+    return validation(field, zone, msg,  /^[a-zA-ZÀ-ÿ0-9- ',]{2,60}$/);}
 
 // verification email avec regex
-function emailValidation(field, err, msg){
-    field.value.trim();
-    let emailValid = /^(([^<>()[]\.,;:s@]+(.[^<>()[]\.,;:s@]+)*)|(.+))@(([[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}])|(([a-zA-Z-0-9]+.)+[a-zA-Z]{2,}))$/;
-    if (emailValid.test(field.value)) {
-        console.log("email valid");
-        return true;
-    }else{
-        document.querySelector("#"+err+"ErrorMsg").textContent = msg+" invalide";
-        console.log("email NO");
-        return false;
-    }
-}
+function emailValidation(field, zone, msg) {
+    return validation(field, zone, msg,  /^(([^<>()[]\.,;:s@]+(.[^<>()[]\.,;:s@]+)*)|(.+))@(([[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}])|(([a-zA-Z-0-9]+.)+[a-zA-Z]{2,}))$/);}
 
 // fonction qui vérifie le statut boolean de toute les verifications d'input
 function form_verify() {

@@ -29,7 +29,7 @@ function kanapColors(color){
 }
 
 // requête GET pour avoir les data "_id" de l'API + l'execution des fonctions
-fetch("http://localhost:3000/API/products/" + productId)
+fetch("http://localhost:3000/api/products/" + productId)
     .then(function(res) {
         if (res.ok) {
             return res.json();
