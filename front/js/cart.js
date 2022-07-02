@@ -144,6 +144,7 @@ function calc() {
     if (cart.length == 0){
         totalQuantity.textContent = "0";
         totalDisplay.textContent = "0";
+        document.querySelector("#cartAndFormContainer > h1").textContent= "VOTRE PANIER EST VIDE";
     }
 }
 
