@@ -4,3 +4,5 @@ let orderId = urlParams.get("orderId");
 let confirmationId = document.querySelector("#orderId");
 
 confirmationId.textContent = orderId;
+
+localStorage.clear();

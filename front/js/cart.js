@@ -35,7 +35,7 @@ function createKanap(kanap){
     newDiv_again_2.setAttribute("class", "cart__item__content__settings__delete");
     newDelete.setAttribute("class", "deleteItem");
     newColor.textContent = kanap.color;
-    newQuantity.textContent = "Qté : "+kanap.quantity;
+    newQuantity.textContent = "Qté : ";
     newDelete.textContent = "Supprimer";
 
    // gestion de l'event QUANTITE
@@ -230,7 +230,7 @@ function form_verify() {
     return (nameValidation(firstNameInput, "firstName", "Prénom") 
         && nameValidation(lastNameInput, "lastName", "Nom")
         && locationValidation(addressInput, "address", "Adresse")
-        && locationValidation(cityInput, "city", "Ville")
+        && nameValidation(cityInput, "city", "Ville")
         && emailValidation(emailInput, "email", "Adresse mail"));
 }
 
